@@ -49,6 +49,15 @@
     </div>
 
     <div class="glass chart-container">
+      <div class="chart-controls">
+        <label for="rangeSelect">Chart Range</label>
+        <select id="rangeSelect" class="input-glass" onchange="updateChart()">
+          <option value="all">All Time</option>
+          <option value="year">Last Year</option>
+          <option value="month">Last Month</option>
+          <option value="week">Last 7 Days</option>
+        </select>
+      </div>
       <canvas id="progressChart" height="200"></canvas>
     </div>
 
