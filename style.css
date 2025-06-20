@@ -1,16 +1,199 @@
-body { margin:0; font-family:system-ui; background:#e0e5ec; padding:1rem; }
-.app-container { position:relative; }
-.menu-btn { position:fixed; top:1rem; right:1rem; width:40px;height:40px;border:none;background:rgba(255,255,255,0.3);backdrop-filter:blur(10px);font-size:1.5rem;border-radius:50%; cursor:pointer; }
-.side-menu { position:fixed; right:-260px; top:0; width:240px;height:100%; background:rgba(255,255,255,0.9);backdrop-filter:blur(20px);transition:right .3s; padding:1rem; }
-.side-menu.open { right:0; }
-.app.dimmed { opacity:0.4; }
-.app { max-width:480px; margin:auto; }
-.glass { background:rgba(255,255,255,0.25); backdrop-filter:blur(15px); border-radius:12px; padding:1rem; margin-bottom:1rem; }
-.stats, .form { }
-.form input, .form select { width:100%; margin:0.5rem 0; padding:0.6rem; border:none; border-radius:8px; background:rgba(255,255,255,0.2);backdrop-filter:blur(10px); }
-.form button { width:100%; padding:0.8rem;margin-top:0.5rem;border:none;border-radius:8px;background:rgba(255,255,255,0.3);cursor:pointer; }
-.suggestion{ text-align:center; }
-.chart-wrapper{ padding:0.5rem 0; }
-.list .entry{ display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.3); padding:0.5rem 0; }
-.dark-mode body { background:#1c1c1e; color:#f1f1f1; }
-.dark-mode .glass { background:rgba(28,28,30,0.5); }
+/* Base Layout */
+body {
+  margin: 0;
+  padding: 1rem;
+  font-family: 'SF Pro Text', system-ui, sans-serif;
+  background: #e0e5ec;
+  color: #111;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.app-container {
+  position: relative;
+}
+
+.app {
+  max-width: 480px;
+  margin: auto;
+  transition: opacity 0.3s ease;
+}
+
+.app.dimmed {
+  opacity: 0.4;
+}
+
+/* Header */
+h1 {
+  font-size: 1.6rem;
+  margin-bottom: 1.4rem;
+  text-align: center;
+}
+
+/* Glass UI Blocks */
+.glass {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(15px);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* Stats */
+.stats {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  text-align: center;
+}
+.stats div {
+  flex: 1;
+  min-width: 100px;
+}
+.stats strong {
+  font-size: 0.9rem;
+  color: #333;
+}
+.stats div div {
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin-top: 0.2rem;
+}
+
+/* Form */
+.form label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.form input {
+  width: 100%;
+  margin: 0.5rem 0 1rem;
+  padding: 0.7rem 1rem;
+  font-size: 1.1rem;
+}
+.form button {
+  width: 100%;
+  padding: 0.8rem;
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.form button:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* Input Fields */
+.input-glass {
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  font-size: 1rem;
+  color: #111;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.3);
+}
+
+/* Suggestion */
+.suggestion {
+  text-align: center;
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 0.7rem;
+  border-radius: 10px;
+}
+
+/* Chart */
+.chart-wrapper {
+  padding: 0.5rem 0;
+}
+.chart-wrapper select {
+  margin-bottom: 1rem;
+}
+
+/* Entry List */
+.list .entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+.list .entry span {
+  flex: 1;
+}
+.list .entry button {
+  background: none;
+  border: none;
+  color: red;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+/* 3 Dots Button */
+.menu-btn {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  border: none;
+  font-size: 1.6rem;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+/* Side Menu */
+.side-menu {
+  position: fixed;
+  top: 0;
+  right: -260px;
+  width: 240px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  box-shadow: -4px 0 8px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  transition: right 0.3s ease;
+  z-index: 999;
+}
+.side-menu.open {
+  right: 0;
+}
+.side-menu h3 {
+  margin-top: 0;
+}
+.side-menu select,
+.side-menu input[type="checkbox"] {
+  margin: 0.5rem 0;
+}
+
+/* Dark Mode */
+.dark-mode body {
+  background: #1c1c1e;
+  color: #f1f1f1;
+}
+.dark-mode .glass {
+  background: rgba(28, 28, 30, 0.5);
+  color: #f1f1f1;
+}
+.dark-mode .input-glass {
+  background: rgba(28, 28, 30, 0.3);
+  color: #fff;
+}
+.dark-mode .menu-btn {
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+}
+.dark-mode .side-menu {
+  background: rgba(28, 28, 30, 0.9);
+}
