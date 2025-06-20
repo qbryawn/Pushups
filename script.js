@@ -1,5 +1,4 @@
-const countSlider = document.getElementById('count');
-const countValue = document.getElementById('countValue');
+const countInput = document.getElementById('count');
 const dateInput = document.getElementById('date');
 const entryList = document.getElementById('entryList');
 const totalPushupsEl = document.getElementById('totalPushups');
@@ -10,10 +9,6 @@ const suggestionBox = document.getElementById('suggestion');
 
 let entries = JSON.parse(localStorage.getItem('pushup_entries')) || [];
 
-function updateCountValue() {
-  countValue.textContent = countSlider.value;
-}
-
 function updateStats() {
   const total = entries.reduce((sum, e) => sum + e.count, 0);
   const avg = entries.length ? Math.round(total / entries.length) : 0;
@@ -23,7 +18,6 @@ function updateStats() {
   sessionCountEl.textContent = entries.length;
   averageEl.textContent = avg;
   nextSuggestionEl.textContent = suggestion;
-
   suggestionBox.classList.toggle('hidden', entries.length === 0);
 }
 
@@ -43,9 +37,9 @@ function renderEntries() {
 }
 
 function addEntry() {
-  const count = parseInt(countSlider.value);
+  const count = parseInt(countInput.value);
   const date = dateInput.value;
-  if (!date || count < 1) return;
+  if (!date || count < 1 || isNaN(count)) return;
 
   const newEntry = {
     id: Date.now().toString(),
@@ -57,8 +51,7 @@ function addEntry() {
   localStorage.setItem('pushup_entries', JSON.stringify(entries));
   renderEntries();
   updateStats();
-  countSlider.value = 10;
-  updateCountValue();
+  countInput.value = "10";
   dateInput.value = new Date().toISOString().split('T')[0];
 }
 
@@ -69,9 +62,8 @@ function deleteEntry(id) {
   updateStats();
 }
 
-countSlider.addEventListener('input', updateCountValue);
 document.addEventListener('DOMContentLoaded', () => {
-  updateCountValue();
+  countInput.value = "10";
   dateInput.value = new Date().toISOString().split('T')[0];
   renderEntries();
   updateStats();
