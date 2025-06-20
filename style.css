@@ -1,0 +1,82 @@
+body {
+  font-family: 'SF Pro Text', system-ui, sans-serif;
+  background: #e0e5ec;
+  margin: 0;
+  padding: 2rem;
+}
+
+.app {
+  max-width: 500px;
+  margin: auto;
+}
+
+h1 {
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(18px);
+  border-radius: 16px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stats {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.form label {
+  display: block;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.form input[type="date"],
+.form input[type="range"],
+.form button {
+  width: 100%;
+  margin-top: 0.3rem;
+  margin-bottom: 0.6rem;
+}
+
+.range-value {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.list .entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.list .entry span {
+  flex: 1;
+}
+
+.list .entry button {
+  background: none;
+  border: none;
+  color: red;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.suggestion {
+  text-align: center;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.hidden {
+  display: none;
+}
