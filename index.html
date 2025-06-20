@@ -1,62 +1,150 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PushUp Pro | Track Your Progress</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pushup Tracker</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600&display=swap">
+  <style>
+    :root {
+      --primary-color: #000;
+      --bg-color: #fff;
+      --accent-color: #007AFF;
+      --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font);
+      background-color: var(--bg-color);
+      color: var(--primary-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 400px;
+      width: 100%;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+      border-radius: 20px;
+      background: #ffffffcc;
+      backdrop-filter: blur(20px);
+    }
+
+    h1 {
+      font-weight: 600;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      font-size: 1rem;
+      margin-top: 1rem;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      outline: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      transition: border-color 0.2s ease;
+    }
+
+    input:focus {
+      border-color: var(--accent-color);
+    }
+
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      margin-top: 1rem;
+      border: none;
+      border-radius: 12px;
+      background: var(--accent-color);
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .stats {
+      margin-top: 1.5rem;
+      font-size: 1rem;
+    }
+
+    .history {
+      margin-top: 1.5rem;
+    }
+
+    .history h2 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .history-list {
+      list-style: none;
+      padding: 0;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .history-list li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #eee;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header class="app-header">
-            <h1><i class="fas fa-fire"></i> PushUp Pro</h1>
-            <p class="tagline">Track your daily push-up journey</p>
-        </header>
-
-        <div class="stats-grid">
-            <div class="stat-card accent">
-                <div class="stat-value" id="total-pushups">0</div>
-                <div class="stat-label">Total Reps</div>
-                <i class="stat-icon fas fa-dumbbell"></i>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="total-sessions">0</div>
-                <div class="stat-label">Sessions</div>
-                <i class="stat-icon fas fa-calendar-check"></i>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="current-streak">0</div>
-                <div class="stat-label">Day Streak</div>
-                <i class="stat-icon fas fa-bolt"></i>
-            </div>
-        </div>
-
-        <div class="log-card">
-            <h2><i class="fas fa-plus-circle"></i> New Session</h2>
-            <div class="input-group">
-                <input type="number" id="pushup-count" min="1" placeholder="Number of push-ups">
-                <button id="log-button" class="primary-btn">
-                    <i class="fas fa-save"></i> Log It
-                </button>
-            </div>
-        </div>
-
-        <div class="history-card">
-            <div class="history-header">
-                <h2><i class="fas fa-history"></i> Your History</h2>
-                <div class="streak-display" id="streak-display">🔥 0-day streak</div>
-            </div>
-            <div id="history-list" class="history-list">
-                <div class="empty-state">
-                    <i class="fas fa-clipboard-list"></i>
-                    <p>No sessions logged yet</p>
-                    <p class="hint">Complete your first session to see data here</p>
-                </div>
-            </div>
-        </div>
+  <div class="container">
+    <h1>Pushup Tracker</h1>
+    <input type="number" id="pushupInput" placeholder="How many today?" />
+    <button onclick="submitPushups()">Add Pushups</button>
+    <div class="stats">
+      <p id="lastEntry"></p>
+      <p id="suggestion"></p>
     </div>
+    <div class="history">
+      <h2>History</h2>
+      <ul id="historyList" class="history-list"></ul>
+    </div>
+  </div>
 
-    <script src="script.js"></script>
+  <script>
+    const pushupInput = document.getElementById('pushupInput');
+    const lastEntryEl = document.getElementById('lastEntry');
+    const suggestionEl = document.getElementById('suggestion');
+    const historyList = document.getElementById('historyList');
+
+    const loadHistory = () => {
+      const history = JSON.parse(localStorage.getItem('pushupHistory')) || [];
+      historyList.innerHTML = history.slice().reverse().map(p => `<li>${p} pushups</li>`).join('');
+      if (history.length > 0) {
+        const last = history[history.length - 1];
+        lastEntryEl.innerText = `You did ${last} pushups today.`;
+        suggestionEl.innerText = `Try ${Math.ceil(last * 1.1)} tomorrow! 💪`;
+      } else {
+        lastEntryEl.innerText = 'No pushups logged yet.';
+        suggestionEl.innerText = '';
+      }
+    };
+
+    const submitPushups = () => {
+      const count = parseInt(pushupInput.value);
+      if (!count || count <= 0) return alert('Please enter a valid number.');
+
+      const history = JSON.parse(localStorage.getItem('pushupHistory')) || [];
+      history.push(count);
+      localStorage.setItem('pushupHistory', JSON.stringify(history));
+      pushupInput.value = '';
+      loadHistory();
+    };
+
+    loadHistory();
+  </script>
 </body>
 </html>
