@@ -1,99 +1,163 @@
+:root {
+    --primary: #4a6fa5;
+    --primary-light: #e8f0fe;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --radius: 12px;
+    --transition: all 0.2s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
 body {
-  margin: 0;
-  font-family: system-ui, sans-serif;
-  background: #f4f6f9;
-  color: #222;
+    background-color: #f5f7fa;
+    color: #333;
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
-.wrapper {
-  display: flex;
-  min-height: 100vh;
+header {
+    text-align: center;
+    margin-bottom: 24px;
+    animation: fadeIn 0.5s ease;
 }
 
-/* Sidebar */
-.sidebar {
-  background: #ffffff;
-  width: 250px;
-  padding: 1rem;
-  box-shadow: 2px 0 10px rgba(0,0,0,0.05);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-.sidebar h2 {
-  margin-top: 0;
-}
-.sidebar select {
-  width: 100%;
-  padding: 0.5rem;
-}
-.side-box {
-  font-size: 0.9rem;
-}
-.side-box ul {
-  padding-left: 1.2rem;
-  margin: 0.3rem 0;
-}
-
-/* Main Content */
-.main {
-  flex: 1;
-  padding: 2rem;
-  max-width: 700px;
-  margin: auto;
-}
 h1 {
-  font-size: 1.4rem;
-  margin-bottom: 1.5rem;
+    color: var(--primary);
+    margin-bottom: 8px;
 }
 
-/* Entry Form */
-.entry-form {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-}
-.entry-form input {
-  padding: 0.6rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
-}
-.entry-form button {
-  padding: 0.6rem 1rem;
-  background: #007aff;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-}
-.entry-form button:hover {
-  background: #005bd1;
+.subtitle {
+    color: #666;
+    font-weight: normal;
 }
 
-/* Summary */
-.log-summary {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
+.card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
 }
 
-/* Log List */
-.log-list .entry {
-  display: flex;
-  justify-content: space-between;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 0.6rem 1rem;
-  margin-bottom: 0.5rem;
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
-.log-list .entry button {
-  border: none;
-  background: none;
-  color: red;
-  font-size: 1.2rem;
-  cursor: pointer;
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #666;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: var(--radius);
+    font-size: 16px;
+    transition: var(--transition);
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+button {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    transition: var(--transition);
+}
+
+button:hover {
+    background-color: #3a5a8f;
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.history {
+    margin-top: 24px;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    animation: fadeIn 0.3s ease;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-date {
+    font-weight: 500;
+}
+
+.history-count {
+    color: var(--primary);
+    font-weight: bold;
+}
+
+.empty-state {
+    text-align: center;
+    color: #666;
+    padding: 20px 0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
 }
