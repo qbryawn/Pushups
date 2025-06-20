@@ -1,151 +1,79 @@
-const countInput = document.getElementById('count');
-const dateInput = document.getElementById('date');
-const entryList = document.getElementById('entryList');
-const totalPushupsEl = document.getElementById('totalPushups');
-const sessionCountEl = document.getElementById('sessionCount');
-const averageEl = document.getElementById('average');
-const streakEl = document.getElementById('streak');
-const nextSuggestionEl = document.getElementById('nextSuggestion');
-const suggestionBox = document.getElementById('suggestion');
-const chartCanvas = document.getElementById('progressChart');
-const rangeSelect = document.getElementById('rangeSelect');
-const sideMenu = document.getElementById('sideMenu');
-const app = document.querySelector('.app');
-const darkToggle = document.getElementById('darkModeToggle');
-
 let entries = JSON.parse(localStorage.getItem('pushup_entries')) || [];
+const countEl = document.getElementById('count');
+const dateEl = document.getElementById('date');
+const totalEl = document.getElementById('totalPushups');
+const sessionEl = document.getElementById('sessionCount');
+const streakEl = document.getElementById('streak');
+const nextEl = document.getElementById('nextSuggestion');
+const suggBox = document.getElementById('suggestion');
+const rangeEl = document.getElementById('rangeSelect');
+const ctx = document.getElementById('progressChart');
+const entryList = document.getElementById('entryList');
 let chart;
 
-function updateStats() {
-  const total = entries.reduce((sum, e) => sum + e.count, 0);
-  const avg = entries.length ? Math.round(total / entries.length) : 0;
-  const suggestion = Math.min(avg + 5, 200);
-  const streak = calculateStreak();
-
-  totalPushupsEl.textContent = total;
-  sessionCountEl.textContent = entries.length;
-  averageEl.textContent = avg;
-  streakEl.textContent = `${streak} 🔥`;
-  nextSuggestionEl.textContent = suggestion;
-  suggestionBox.classList.toggle('hidden', entries.length === 0);
-
+function renderEntries(){
+  entries.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  entryList.innerHTML = entries.map(e=>`
+    <div class="entry"><span>${e.date}: ${e.count}</span>
+    <button onclick="del('${e.id}')">✖</button></div>`).join('');
+}
+function updateStats(){
+  const total=entries.reduce((a,e)=>a+e.count,0);
+  const avg = entries.length?Math.round(total/entries.length):0;
+  const suggestion=avg+5;
+  totalEl.textContent=total; sessionEl.textContent=entries.length;
+  streakEl.textContent=`${calcStreak()} 🔥`; nextEl.textContent=suggestion;
+  suggBox.classList.toggle('hidden',!entries.length);
   updateChart();
 }
-
-function renderEntries() {
-  entryList.innerHTML = '';
-  const sorted = [...entries].sort((a, b) => new Date(b.date) - new Date(a.date));
-  sorted.forEach(entry => {
-    const div = document.createElement('div');
-    div.className = 'entry';
-    div.innerHTML = `
-      <span>${entry.count} push‑ups</span>
-      <span>${new Date(entry.date).toLocaleDateString()}</span>
-      <button onclick="deleteEntry('${entry.id}')">✖</button>
-    `;
-    entryList.appendChild(div);
-  });
+function addEntry(){
+  const d=dateEl.value, c=parseInt(countEl.value);
+  if(!d||c<1) return;
+  entries.push({id:Date.now(),date:d,count:c});
+  localStorage.setItem('pushup_entries',JSON.stringify(entries));
+  renderEntries(); updateStats();
 }
-
-function addEntry() {
-  const count = parseInt(countInput.value);
-  const date = dateInput.value;
-  if (!date || count < 1 || isNaN(count)) return;
-
-  entries.push({ id: Date.now().toString(), count, date });
-  localStorage.setItem('pushup_entries', JSON.stringify(entries));
-  renderEntries();
-  updateStats();
-  countInput.value = "10";
+function del(id){
+  entries=entries.filter(e=>e.id!=id);
+  localStorage.setItem('pushup_entries',JSON.stringify(entries));
+  renderEntries(); updateStats();
 }
-
-function deleteEntry(id) {
-  entries = entries.filter(e => e.id !== id);
-  localStorage.setItem('pushup_entries', JSON.stringify(entries));
-  renderEntries();
-  updateStats();
-}
-
-function calculateStreak() {
-  const dates = [...new Set(entries.map(e => e.date))].sort();
-  let streak = 0;
-  let current = new Date();
-  current.setHours(0,0,0,0);
-
-  for (let i = dates.length - 1; i >= 0; i--) {
-    const d = new Date(dates[i]);
-    d.setHours(0,0,0,0);
-    if (d.getTime() === current.getTime()) {
-      streak++;
-      current.setDate(current.getDate() - 1);
-    } else {
-      break;
-    }
+function calcStreak(){
+  const days=[...new Set(entries.map(e=>e.date))].sort();
+  let curr=new Date(),st=0;
+  curr.setHours(0,0,0,0);
+  for(let i=days.length-1;i>=0;i--){
+    const d=new Date(days[i]);d.setHours(0,0,0,0);
+    if(d.getTime()===curr.getTime()){st++;curr.setDate(curr.getDate()-1);} else break;
   }
-  return streak;
+  return st;
+}
+function exportCSV(){
+  const csv='Date,Count\n'+entries.map(e=>`${e.date},${e.count}`).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv]));a.download='log.csv';a.click();
+}
+function updateChart(){
+  const range=rangeEl.value;
+  const now=new Date();
+  let from=new Date();
+  if(range==='week') from.setDate(now.getDate()-7);
+  else if(range==='month') from.setMonth(now.getMonth()-1);
+  else from=new Date(0);
+  const data=entries.filter(e=>new Date(e.date)>=from).reduce((o,e)=>{o[e.date]=(o[e.date]||0)+e.count;return o;},{});
+  const labels=Object.keys(data).sort();
+  const vals=labels.map(d=>data[d]);
+  if(chart) chart.destroy();
+  chart=new Chart(ctx,{type:'bar',data:{labels, datasets:[{data:vals,backgroundColor:'#007aff'}]},options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}});
+}
+function toggleMenu(){
+  document.body.querySelector('.side-menu').classList.toggle('open');
+  document.querySelector('.app').classList.toggle('dimmed');
+}
+function toggleDarkMode(){
+  document.body.classList.toggle('dark-mode');
 }
 
-function exportCSV() {
-  const header = "Date,Pushups\n";
-  const rows = entries.map(e => `${e.date},${e.count}`).join("\n");
-  const csv = header + rows;
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = "pushup_log.csv";
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function updateChart() {
-  const range = rangeSelect.value;
-  const now = new Date();
-  let fromDate = new Date(0);
-
-  if (range === "week") {
-    fromDate = new Date(now); fromDate.setDate(now.getDate() - 7);
-  } else if (range === "month") {
-    fromDate = new Date(now); fromDate.setMonth(now.getMonth() - 1);
-  } else if (range === "year") {
-    fromDate = new Date(now); fromDate.setFullYear(now.getFullYear() - 1);
-  }
-
-  const grouped = {};
-  entries.forEach(e => {
-    let d = new Date(e.date);
-    if (d >= fromDate) grouped[e.date] = (grouped[e.date] || 0) + e.count;
-  });
-
-  const sorted = Object.entries(grouped).sort((a, b) => new Date(a[0]) - new Date(b[0]));
-  const labels = sorted.map(e => new Date(e[0]).toLocaleDateString());
-  const data = sorted.map(e => e[1]);
-
-  if (chart) chart.destroy();
-  chart = new Chart(chartCanvas, {
-    type: 'bar',
-    data: { labels, datasets: [{ data, backgroundColor: '#007aff' }] },
-    options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } }, responsive: true }
-  });
-}
-
-function toggleMenu() {
-  sideMenu.classList.toggle('open');
-  app.classList.toggle('dimmed');
-}
-
-function closeMenu() { toggleMenu(); }
-
-function switchAccount() {
-  alert('🚧 Switch account feature not implemented yet.');
-}
-
-function toggleDarkMode() {
-  document.body.classList.toggle('dark-mode', darkToggle.checked);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  dateInput.value = new Date().toISOString().split('T')[0];
-  renderEntries();
-  updateStats();
+document.addEventListener('DOMContentLoaded',()=>{
+  dateEl.value=new Date().toISOString().split('T')[0];
+  renderEntries(); updateStats();
 });
