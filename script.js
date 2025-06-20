@@ -8,6 +8,7 @@ const streakEl = document.getElementById('streak');
 const nextSuggestionEl = document.getElementById('nextSuggestion');
 const suggestionBox = document.getElementById('suggestion');
 const chartCanvas = document.getElementById('progressChart');
+const rangeSelect = document.getElementById('rangeSelect');
 
 let entries = JSON.parse(localStorage.getItem('pushup_entries')) || [];
 let chart;
@@ -86,7 +87,6 @@ function exportCSV() {
   const header = "Date,Pushups\n";
   const rows = entries.map(e => `${e.date},${e.count}`).join("\n");
   const csv = header + rows;
-
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -97,10 +97,26 @@ function exportCSV() {
 }
 
 function updateChart() {
+  const range = rangeSelect.value;
+  const now = new Date();
+  let fromDate = new Date(0);
+
+  if (range === "week") {
+    fromDate = new Date(now); fromDate.setDate(now.getDate() - 7);
+  } else if (range === "month") {
+    fromDate = new Date(now); fromDate.setMonth(now.getMonth() - 1);
+  } else if (range === "year") {
+    fromDate = new Date(now); fromDate.setFullYear(now.getFullYear() - 1);
+  }
+
   const grouped = {};
   for (const e of entries) {
-    grouped[e.date] = (grouped[e.date] || 0) + e.count;
+    const entryDate = new Date(e.date);
+    if (entryDate >= fromDate) {
+      grouped[e.date] = (grouped[e.date] || 0) + e.count;
+    }
   }
+
   const sorted = Object.entries(grouped).sort((a, b) => new Date(a[0]) - new Date(b[0]));
   const labels = sorted.map(e => new Date(e[0]).toLocaleDateString());
   const data = sorted.map(e => e[1]);
@@ -126,22 +142,8 @@ function updateChart() {
   });
 }
 
-function requestNotification() {
-  if (Notification.permission === "granted") {
-    setInterval(() => {
-      const now = new Date();
-      if (now.getHours() === 18 && now.getMinutes() === 0) {
-        new Notification("💪 Time to log your push‑ups!");
-      }
-    }, 60000); // Check every minute
-  } else {
-    Notification.requestPermission();
-  }
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   dateInput.value = new Date().toISOString().split('T')[0];
   renderEntries();
   updateStats();
-  requestNotification();
 });
