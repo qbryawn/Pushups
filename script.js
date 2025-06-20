@@ -4,21 +4,28 @@ const entryList = document.getElementById('entryList');
 const totalPushupsEl = document.getElementById('totalPushups');
 const sessionCountEl = document.getElementById('sessionCount');
 const averageEl = document.getElementById('average');
+const streakEl = document.getElementById('streak');
 const nextSuggestionEl = document.getElementById('nextSuggestion');
 const suggestionBox = document.getElementById('suggestion');
+const chartCanvas = document.getElementById('progressChart');
 
 let entries = JSON.parse(localStorage.getItem('pushup_entries')) || [];
+let chart;
 
 function updateStats() {
   const total = entries.reduce((sum, e) => sum + e.count, 0);
   const avg = entries.length ? Math.round(total / entries.length) : 0;
   const suggestion = Math.min(avg + 5, 200);
+  const streak = calculateStreak();
 
   totalPushupsEl.textContent = total;
   sessionCountEl.textContent = entries.length;
   averageEl.textContent = avg;
+  streakEl.textContent = `${streak} 🔥`;
   nextSuggestionEl.textContent = suggestion;
   suggestionBox.classList.toggle('hidden', entries.length === 0);
+
+  updateChart();
 }
 
 function renderEntries() {
@@ -41,18 +48,12 @@ function addEntry() {
   const date = dateInput.value;
   if (!date || count < 1 || isNaN(count)) return;
 
-  const newEntry = {
-    id: Date.now().toString(),
-    count,
-    date
-  };
-
+  const newEntry = { id: Date.now().toString(), count, date };
   entries.push(newEntry);
   localStorage.setItem('pushup_entries', JSON.stringify(entries));
   renderEntries();
   updateStats();
   countInput.value = "10";
-  dateInput.value = new Date().toISOString().split('T')[0];
 }
 
 function deleteEntry(id) {
@@ -62,9 +63,85 @@ function deleteEntry(id) {
   updateStats();
 }
 
+function calculateStreak() {
+  const dates = [...new Set(entries.map(e => e.date))].sort();
+  let streak = 0;
+  let current = new Date();
+  current.setHours(0, 0, 0, 0);
+
+  for (let i = dates.length - 1; i >= 0; i--) {
+    const entryDate = new Date(dates[i]);
+    entryDate.setHours(0, 0, 0, 0);
+    if (entryDate.getTime() === current.getTime()) {
+      streak++;
+      current.setDate(current.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+function exportCSV() {
+  const header = "Date,Pushups\n";
+  const rows = entries.map(e => `${e.date},${e.count}`).join("\n");
+  const csv = header + rows;
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = "pushup_log.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function updateChart() {
+  const grouped = {};
+  for (const e of entries) {
+    grouped[e.date] = (grouped[e.date] || 0) + e.count;
+  }
+  const sorted = Object.entries(grouped).sort((a, b) => new Date(a[0]) - new Date(b[0]));
+  const labels = sorted.map(e => new Date(e[0]).toLocaleDateString());
+  const data = sorted.map(e => e[1]);
+
+  if (chart) chart.destroy();
+  chart = new Chart(chartCanvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Pushups per Day',
+        data,
+        backgroundColor: '#007aff'
+      }]
+    },
+    options: {
+      scales: { y: { beginAtZero: true } },
+      responsive: true,
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+function requestNotification() {
+  if (Notification.permission === "granted") {
+    setInterval(() => {
+      const now = new Date();
+      if (now.getHours() === 18 && now.getMinutes() === 0) {
+        new Notification("💪 Time to log your push‑ups!");
+      }
+    }, 60000); // Check every minute
+  } else {
+    Notification.requestPermission();
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  countInput.value = "10";
   dateInput.value = new Date().toISOString().split('T')[0];
   renderEntries();
   updateStats();
+  requestNotification();
 });
