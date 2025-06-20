@@ -23,22 +23,16 @@
         <strong>Avg</strong>
         <div id="average">0</div>
       </div>
+      <div>
+        <strong>Streak</strong>
+        <div id="streak">0 🔥</div>
+      </div>
     </div>
 
     <div class="glass form">
       <div class="input-group">
         <label for="count">Push‑up Count</label>
-        <input
-          id="count"
-          type="number"
-          min="1"
-          max="200"
-          value="10"
-          inputmode="numeric"
-          pattern="[0-9]*"
-          class="input-glass"
-          required
-        />
+        <input id="count" type="number" min="1" max="200" value="10" inputmode="numeric" pattern="[0-9]*" class="input-glass" required />
       </div>
 
       <div class="input-group">
@@ -47,17 +41,21 @@
       </div>
 
       <button onclick="addEntry()">Add Entry</button>
+      <button onclick="exportCSV()">📤 Export CSV</button>
     </div>
 
     <div id="suggestion" class="glass suggestion hidden">
       🎯 Try <strong id="nextSuggestion">15</strong> push‑ups next time
     </div>
 
-    <div class="glass list" id="entryList">
-      <!-- entries go here -->
+    <div class="glass chart-container">
+      <canvas id="progressChart" height="200"></canvas>
     </div>
+
+    <div class="glass list" id="entryList"></div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
