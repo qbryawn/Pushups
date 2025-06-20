@@ -1,89 +1,133 @@
-let currentUser = localStorage.getItem("currentUser") || "jonas";
-let entries = [];
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize data
+    let pushupData = JSON.parse(localStorage.getItem('pushupData')) || {
+        sessions: [],
+        lastEntryDate: null,
+        currentStreak: 0
+    };
 
-const $ = id => document.getElementById(id);
-const getKey = () => `pushup_entries_${currentUser}`;
+    // DOM elements
+    const pushupCountInput = document.getElementById('pushup-count');
+    const logButton = document.getElementById('log-button');
+    const historyList = document.getElementById('history-list');
+    const totalPushupsEl = document.getElementById('total-pushups');
+    const totalSessionsEl = document.getElementById('total-sessions');
+    const currentStreakEl = document.getElementById('current-streak');
 
-function loadEntries() {
-  entries = JSON.parse(localStorage.getItem(getKey())) || [];
-}
+    // Update stats display
+    function updateStats() {
+        const totalPushups = pushupData.sessions.reduce((sum, session) => sum + session.count, 0);
+        const totalSessions = pushupData.sessions.length;
 
-function saveEntries() {
-  localStorage.setItem(getKey(), JSON.stringify(entries));
-}
+        totalPushupsEl.textContent = totalPushups;
+        totalSessionsEl.textContent = totalSessions;
+        currentStreakEl.textContent = pushupData.currentStreak;
+    }
 
-function renderEntries() {
-  $("entryList").innerHTML = entries
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .map(e => `
-      <div class="entry">
-        <span>${e.date}: ${e.count}</span>
-        <button onclick="deleteEntry('${e.id}')">✖</button>
-      </div>`).join('');
-}
+    // Update history display
+    function updateHistory() {
+        if (pushupData.sessions.length === 0) {
+            historyList.innerHTML = '<div class="empty-state">No sessions logged yet</div>';
+            return;
+        }
 
-function updateStats() {
-  const total = entries.reduce((sum, e) => sum + e.count, 0);
-  const best = entries.sort((a, b) => b.count - a.count)[0]?.count || "-";
-  const streak = calcStreak();
+        historyList.innerHTML = '';
+        pushupData.sessions.slice().reverse().forEach(session => {
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            
+            const date = new Date(session.date);
+            const dateStr = date.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            
+            item.innerHTML = `
+                <span class="history-date">${dateStr}</span>
+                <span class="history-count">${session.count} push-ups</span>
+            `;
+            
+            historyList.appendChild(item);
+        });
+    }
 
-  $("totalPushups").textContent = total;
-  $("sessionCount").textContent = entries.length;
-  $("streak").textContent = `${streak} 🔥`;
-  $("bestDay").textContent = best;
-}
+    // Check and update streak
+    function updateStreak(newDate) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        const newEntryDate = new Date(newDate);
+        newEntryDate.setHours(0, 0, 0, 0);
+        
+        // If first entry
+        if (!pushupData.lastEntryDate) {
+            pushupData.currentStreak = 1;
+        } 
+        // If logged today, don't increase streak
+        else if (newEntryDate.getTime() === today.getTime() && 
+                 pushupData.lastEntryDate === today.toISOString()) {
+            // Streak remains the same
+        }
+        // If logged yesterday or today (and previous was before yesterday)
+        else {
+            const lastEntryDate = new Date(pushupData.lastEntryDate);
+            lastEntryDate.setHours(0, 0, 0, 0);
+            
+            const dayDifference = (newEntryDate - lastEntryDate) / (1000 * 60 * 60 * 24);
+            
+            if (dayDifference === 1) {
+                // Consecutive day
+                pushupData.currentStreak++;
+            } else if (dayDifference > 1) {
+                // Broken streak
+                pushupData.currentStreak = 1;
+            }
+        }
+        
+        pushupData.lastEntryDate = newEntryDate.toISOString();
+    }
 
-function calcStreak() {
-  const dates = [...new Set(entries.map(e => e.date))].sort();
-  let streak = 0;
-  let current = new Date();
-  current.setHours(0, 0, 0, 0);
+    // Log a new session
+    function logSession(count) {
+        if (!count || count < 1) return;
+        
+        const now = new Date();
+        pushupData.sessions.push({
+            date: now.toISOString(),
+            count: parseInt(count)
+        });
+        
+        updateStreak(now);
+        saveData();
+        updateStats();
+        updateHistory();
+        
+        // Clear input
+        pushupCountInput.value = '';
+        pushupCountInput.focus();
+    }
 
-  for (let i = dates.length - 1; i >= 0; i--) {
-    const d = new Date(dates[i]);
-    d.setHours(0, 0, 0, 0);
-    if (d.getTime() === current.getTime()) {
-      streak++;
-      current.setDate(current.getDate() - 1);
-    } else break;
-  }
-  return streak;
-}
+    // Save data to localStorage
+    function saveData() {
+        localStorage.setItem('pushupData', JSON.stringify(pushupData));
+    }
 
-function addEntry() {
-  const date = $("date").value;
-  const count = parseInt($("count").value);
-  if (!date || isNaN(count) || count < 1) return;
+    // Event listeners
+    logButton.addEventListener('click', function() {
+        logSession(pushupCountInput.value);
+    });
 
-  entries.push({ id: Date.now(), date, count });
-  saveEntries();
-  renderEntries();
-  updateStats();
-  $("count").value = 10;
-}
+    pushupCountInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            logSession(pushupCountInput.value);
+        }
+    });
 
-function deleteEntry(id) {
-  entries = entries.filter(e => e.id != id);
-  saveEntries();
-  renderEntries();
-  updateStats();
-}
-
-function switchUser(id) {
-  currentUser = id;
-  localStorage.setItem("currentUser", id);
-  $("currentUserLabel").textContent = id === "jonas" ? "Jonas" : "Marija";
-  $("userSelect").value = id;
-  loadEntries();
-  renderEntries();
-  updateStats();
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  $("date").value = new Date().toISOString().split("T")[0];
-  $("userSelect").value = currentUser;
-  $("currentUserLabel").textContent = currentUser === "jonas" ? "Jonas" : "Marija";
-  loadEntries();
-  renderEntries();
-  updateStats();
+    // Initialize the app
+    updateStats();
+    updateHistory();
 });
