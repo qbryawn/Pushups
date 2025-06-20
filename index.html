@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Push‑up Tracker</title>
-<link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Push‑up Tracker</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="app-container">
     <button class="menu-btn" onclick="toggleMenu()">⋯</button>
     <div class="app">
-      <h1>💪 Push‑up Tracker</h1>
+      <h1>💪 <span id="currentUserLabel">User 1</span>'s Push‑ups</h1>
 
       <div class="glass stats">
         <div><strong>Total</strong><div id="totalPushups">0</div></div>
@@ -19,16 +19,16 @@
       </div>
 
       <div class="glass form">
-        <label for="count">Push‑ups</label>
+        <label>Push‑ups</label>
         <input id="count" type="number" min="1" max="200" value="10" class="input-glass" />
-        <label for="date">Date</label>
+        <label>Date</label>
         <input id="date" type="date" class="input-glass" />
         <button onclick="addEntry()">Add Entry</button>
         <button onclick="exportCSV()">Export CSV</button>
       </div>
 
       <div id="suggestion" class="glass suggestion hidden">
-        🎯 Do <strong id="nextSuggestion">0</strong> push‑ups next time
+        🎯 Try <strong id="nextSuggestion">0</strong> push‑ups next time
       </div>
 
       <div class="glass chart-wrapper">
@@ -37,20 +37,25 @@
           <option value="month">Last Month</option>
           <option value="all">All Time</option>
         </select>
-        <canvas id="progressChart" height="150"></canvas>
+        <canvas id="progressChart" height="160"></canvas>
       </div>
 
       <div class="glass list" id="entryList"></div>
     </div>
 
     <div id="sideMenu" class="side-menu">
-      <button onclick="toggleMenu()">Close</button>
-      <hr>
-      <label><input type="checkbox" id="darkToggle" onchange="toggleDarkMode()" /> Dark Mode</label>
+      <h3>Settings</h3>
+      <label>User</label>
+      <select id="userSelect" class="input-glass" onchange="switchUser(this.value)">
+        <option value="user1">User 1</option>
+        <option value="user2">User 2</option>
+        <option value="user3">User 3</option>
+      </select>
+      <label><input type="checkbox" onchange="toggleDarkMode()"> Dark Mode</label>
     </div>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
