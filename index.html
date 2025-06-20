@@ -1,64 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Push-up Logger</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Push-Up Tracker</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="wrapper">
-    <aside class="sidebar">
-      <h2>Menu</h2>
-      <label>User</label>
-      <select id="userSelect" onchange="switchUser(this.value)">
-        <option value="jonas">Jonas</option>
-        <option value="marija">Marija</option>
-      </select>
+    <header>
+        <h1>Push-Up Tracker</h1>
+        <p class="subtitle">Build strength one rep at a time</p>
+    </header>
 
-      <div class="side-box">
-        <strong>Weekly Goal:</strong>
-        <div id="goalDisplay">100</div>
-      </div>
+    <div class="stats-container">
+        <div class="card stat">
+            <div class="stat-value" id="total-pushups">0</div>
+            <div class="stat-label">Total Push-Ups</div>
+        </div>
+        <div class="card stat">
+            <div class="stat-value" id="total-sessions">0</div>
+            <div class="stat-label">Sessions</div>
+        </div>
+        <div class="card stat">
+            <div class="stat-value" id="current-streak">0</div>
+            <div class="stat-label">Day Streak</div>
+        </div>
+    </div>
 
-      <div class="side-box">
-        <strong>Current Streak:</strong>
-        <div id="streak">0 🔥</div>
-      </div>
+    <div class="card">
+        <div class="form-group">
+            <label for="pushup-count">Number of Push-Ups</label>
+            <input type="number" id="pushup-count" min="1" placeholder="e.g. 20">
+        </div>
+        <button id="log-button">Log Session</button>
+    </div>
 
-      <div class="side-box">
-        <strong>Best Day:</strong>
-        <div id="bestDay">-</div>
-      </div>
+    <div class="card history">
+        <h2>History</h2>
+        <div id="history-list">
+            <div class="empty-state">No sessions logged yet</div>
+        </div>
+    </div>
 
-      <div class="side-box">
-        <strong>Tips:</strong>
-        <ul>
-          <li>Focus on form</li>
-          <li>Log daily</li>
-          <li>Rest every 3–4 days</li>
-        </ul>
-      </div>
-    </aside>
-
-    <main class="main">
-      <h1>Push-up Logger (<span id="currentUserLabel">Jonas</span>)</h1>
-
-      <section class="entry-form">
-        <input id="count" type="number" min="1" max="200" value="10" />
-        <input id="date" type="date" />
-        <button onclick="addEntry()">Add Push‑ups</button>
-      </section>
-
-      <section class="log-summary">
-        <div><strong>Total:</strong> <span id="totalPushups">0</span></div>
-        <div><strong>Sessions:</strong> <span id="sessionCount">0</span></div>
-      </section>
-
-      <section class="log-list" id="entryList"></section>
-    </main>
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
