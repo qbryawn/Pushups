@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Push‑up Tracker</title>
+  <title>Push-up Tracker</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="app-container">
     <button class="menu-btn" onclick="toggleMenu()">⋯</button>
+
     <div class="app">
-      <h1>💪 <span id="currentUserLabel">User 1</span>'s Push‑ups</h1>
+      <h1><span id="currentUserLabel">Jonas</span>' Push‑up Tracker</h1>
 
       <div class="glass stats">
         <div><strong>Total</strong><div id="totalPushups">0</div></div>
@@ -18,13 +19,15 @@
         <div><strong>Streak</strong><div id="streak">0 🔥</div></div>
       </div>
 
-      <div class="glass form">
-        <label>Push‑ups</label>
-        <input id="count" type="number" min="1" max="200" value="10" class="input-glass" />
-        <label>Date</label>
-        <input id="date" type="date" class="input-glass" />
-        <button onclick="addEntry()">Add Entry</button>
-        <button onclick="exportCSV()">Export CSV</button>
+      <div class="glass entry-form">
+        <h2>New Entry</h2>
+        <div class="input-block">
+          <input id="count" type="number" min="1" max="200" value="10" placeholder="Push-up count" />
+        </div>
+        <div class="input-block">
+          <input id="date" type="date" />
+        </div>
+        <button onclick="addEntry()">➕ Add Entry</button>
       </div>
 
       <div id="suggestion" class="glass suggestion hidden">
@@ -32,12 +35,12 @@
       </div>
 
       <div class="glass chart-wrapper">
-        <select id="rangeSelect" class="input-glass" onchange="updateChart()">
+        <select id="rangeSelect" onchange="updateChart()">
           <option value="week">Last 7 Days</option>
           <option value="month">Last Month</option>
           <option value="all">All Time</option>
         </select>
-        <canvas id="progressChart" height="160"></canvas>
+        <canvas id="progressChart" height="150"></canvas>
       </div>
 
       <div class="glass list" id="entryList"></div>
@@ -46,12 +49,17 @@
     <div id="sideMenu" class="side-menu">
       <h3>Settings</h3>
       <label>User</label>
-      <select id="userSelect" class="input-glass" onchange="switchUser(this.value)">
-        <option value="user1">User 1</option>
-        <option value="user2">User 2</option>
-        <option value="user3">User 3</option>
+      <select id="userSelect" onchange="switchUser(this.value)">
+        <option value="jonas">Jonas</option>
+        <option value="marija">Marija</option>
       </select>
-      <label><input type="checkbox" onchange="toggleDarkMode()"> Dark Mode</label>
+      <hr>
+      <p><strong>Coming Soon:</strong></p>
+      <ul>
+        <li>📅 Weekly goals</li>
+        <li>📈 Progress badges</li>
+        <li>⏰ Daily reminders</li>
+      </ul>
     </div>
   </div>
 
