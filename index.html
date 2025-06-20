@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Push-up Tracker</title>
+  <title>Push‑up Tracker</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -11,23 +11,18 @@
     <button class="menu-btn" onclick="toggleMenu()">⋯</button>
 
     <div class="app">
-      <h1><span id="currentUserLabel">Jonas</span>' Push‑up Tracker</h1>
+      <h1><span id="currentUserLabel">Jonas</span>'s Push-up Tracker</h1>
 
-      <div class="glass stats">
+      <div class="stats glass">
         <div><strong>Total</strong><div id="totalPushups">0</div></div>
         <div><strong>Sessions</strong><div id="sessionCount">0</div></div>
         <div><strong>Streak</strong><div id="streak">0 🔥</div></div>
       </div>
 
-      <div class="glass entry-form">
-        <h2>New Entry</h2>
-        <div class="input-block">
-          <input id="count" type="number" min="1" max="200" value="10" placeholder="Push-up count" />
-        </div>
-        <div class="input-block">
-          <input id="date" type="date" />
-        </div>
-        <button onclick="addEntry()">➕ Add Entry</button>
+      <div class="add-entry glass">
+        <input type="number" id="count" min="1" value="10" placeholder="Push-ups" />
+        <input type="date" id="date" />
+        <button onclick="addEntry()">Add ➕</button>
       </div>
 
       <div id="suggestion" class="glass suggestion hidden">
@@ -40,7 +35,7 @@
           <option value="month">Last Month</option>
           <option value="all">All Time</option>
         </select>
-        <canvas id="progressChart" height="150"></canvas>
+        <canvas id="progressChart" height="160"></canvas>
       </div>
 
       <div class="glass list" id="entryList"></div>
@@ -48,17 +43,17 @@
 
     <div id="sideMenu" class="side-menu">
       <h3>Settings</h3>
-      <label>User</label>
+      <label>Switch User:</label>
       <select id="userSelect" onchange="switchUser(this.value)">
         <option value="jonas">Jonas</option>
         <option value="marija">Marija</option>
       </select>
-      <hr>
-      <p><strong>Coming Soon:</strong></p>
+      <hr />
+      <h4>Coming soon:</h4>
       <ul>
-        <li>📅 Weekly goals</li>
-        <li>📈 Progress badges</li>
-        <li>⏰ Daily reminders</li>
+        <li>Weekly goals</li>
+        <li>Progress badges</li>
+        <li>Reminders</li>
       </ul>
     </div>
   </div>
