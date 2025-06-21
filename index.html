@@ -1,150 +1,127 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Pushup Tracker</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600&display=swap">
   <style>
-    :root {
-      --primary-color: #000;
-      --bg-color: #fff;
-      --accent-color: #007AFF;
-      --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-    }
-
     body {
       margin: 0;
-      padding: 0;
-      font-family: var(--font);
-      background-color: var(--bg-color);
-      color: var(--primary-color);
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #c3cfe2 0%, #c3cfe2 100%);
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
+      height: 100vh;
     }
-
     .container {
+      width: 90%;
       max-width: 400px;
-      width: 100%;
-      padding: 2rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-      border-radius: 20px;
-      background: #ffffffcc;
+    }
+    .glass {
       backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      color: #000;
     }
-
-    h1 {
-      font-weight: 600;
-      font-size: 1.8rem;
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-
-    input {
+    input, button {
       width: 100%;
-      padding: 0.8rem;
-      font-size: 1rem;
-      margin-top: 1rem;
-      border-radius: 12px;
-      border: 1px solid #ccc;
-      outline: none;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      transition: border-color 0.2s ease;
-    }
-
-    input:focus {
-      border-color: var(--accent-color);
-    }
-
-    button {
-      width: 100%;
-      padding: 0.8rem;
-      margin-top: 1rem;
+      margin: 0.5rem 0;
+      padding: 0.75rem;
       border: none;
-      border-radius: 12px;
-      background: var(--accent-color);
-      color: white;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    .stats {
-      margin-top: 1.5rem;
+      border-radius: 8px;
       font-size: 1rem;
     }
-
-    .history {
-      margin-top: 1.5rem;
+    #entries > div {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.25);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-
-    .history h2 {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .history-list {
-      list-style: none;
-      padding: 0;
-      max-height: 150px;
-      overflow-y: auto;
-    }
-
-    .history-list li {
-      padding: 0.5rem 0;
-      border-bottom: 1px solid #eee;
+    button.edit, button.delete {
+      margin-left: 0.5rem;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container glass">
     <h1>Pushup Tracker</h1>
-    <input type="number" id="pushupInput" placeholder="How many today?" />
-    <button onclick="submitPushups()">Add Pushups</button>
-    <div class="stats">
-      <p id="lastEntry"></p>
-      <p id="suggestion"></p>
-    </div>
-    <div class="history">
-      <h2>History</h2>
-      <ul id="historyList" class="history-list"></ul>
-    </div>
+    <form id="entryForm">
+      <input type="date" id="date" required />
+      <input type="number" id="count" placeholder="Pushups" required />
+      <button type="submit">Add Entry</button>
+    </form>
+    <div id="entries"></div>
   </div>
 
   <script>
-    const pushupInput = document.getElementById('pushupInput');
-    const lastEntryEl = document.getElementById('lastEntry');
-    const suggestionEl = document.getElementById('suggestion');
-    const historyList = document.getElementById('historyList');
+    const form = document.getElementById('entryForm');
+    const dateInput = document.getElementById('date');
+    const countInput = document.getElementById('count');
+    const entriesContainer = document.getElementById('entries');
 
-    const loadHistory = () => {
-      const history = JSON.parse(localStorage.getItem('pushupHistory')) || [];
-      historyList.innerHTML = history.slice().reverse().map(p => `<li>${p} pushups</li>`).join('');
-      if (history.length > 0) {
-        const last = history[history.length - 1];
-        lastEntryEl.innerText = `You did ${last} pushups today.`;
-        suggestionEl.innerText = `Try ${Math.ceil(last * 1.1)} tomorrow! 💪`;
-      } else {
-        lastEntryEl.innerText = 'No pushups logged yet.';
-        suggestionEl.innerText = '';
+    function uuid() {
+      return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+
+    function loadEntries() {
+      const entries = JSON.parse(localStorage.getItem('pushupEntries') || '[]');
+      entriesContainer.innerHTML = '';
+      entries.forEach(entry => {
+        const div = document.createElement('div');
+        div.innerHTML = \`
+          \${entry.date} - \${entry.count} pushups
+          <span>
+            <button class="edit" onclick='editEntry("\${entry.id}")'>Edit</button>
+            <button class="delete" onclick='deleteEntry("\${entry.id}")'>Delete</button>
+          </span>
+        \`;
+        entriesContainer.appendChild(div);
+      });
+    }
+
+    form.onsubmit = e => {
+      e.preventDefault();
+      const entries = JSON.parse(localStorage.getItem('pushupEntries') || '[]');
+      entries.push({
+        id: uuid(),
+        date: dateInput.value,
+        count: parseInt(countInput.value)
+      });
+      localStorage.setItem('pushupEntries', JSON.stringify(entries));
+      form.reset();
+      dateInput.valueAsDate = new Date();
+      loadEntries();
+    };
+
+    function deleteEntry(id) {
+      let entries = JSON.parse(localStorage.getItem('pushupEntries') || '[]);
+      entries = entries.filter(e => e.id !== id);
+      localStorage.setItem('pushupEntries', JSON.stringify(entries));
+      loadEntries();
+    }
+
+    function editEntry(id) {
+      let entries = JSON.parse(localStorage.getItem('pushupEntries') || '[]');
+      const entry = entries.find(e => e.id === id);
+      if (!entry) return;
+      const newDate = prompt("New date (YYYY-MM-DD):", entry.date);
+      const newCount = prompt("New pushup count:", entry.count);
+      if (newDate && newCount) {
+        entry.date = newDate;
+        entry.count = parseInt(newCount);
+        localStorage.setItem('pushupEntries', JSON.stringify(entries));
+        loadEntries();
       }
-    };
+    }
 
-    const submitPushups = () => {
-      const count = parseInt(pushupInput.value);
-      if (!count || count <= 0) return alert('Please enter a valid number.');
-
-      const history = JSON.parse(localStorage.getItem('pushupHistory')) || [];
-      history.push(count);
-      localStorage.setItem('pushupHistory', JSON.stringify(history));
-      pushupInput.value = '';
-      loadHistory();
-    };
-
-    loadHistory();
+    dateInput.valueAsDate = new Date();
+    loadEntries();
   </script>
 </body>
 </html>
