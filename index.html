@@ -100,7 +100,7 @@
     };
 
     function deleteEntry(id) {
-      let entries = JSON.parse(localStorage.getItem('pushupEntries') || '[]);
+      let entries = JSON.parse(localStorage.getItem('pushupEntries') || '[]');
       entries = entries.filter(e => e.id !== id);
       localStorage.setItem('pushupEntries', JSON.stringify(entries));
       loadEntries();
