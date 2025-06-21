@@ -1,127 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pushup Tracker</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: linear-gradient(135deg, #c3cfe2 0%, #c3cfe2 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .container {
-      width: 90%;
-      max-width: 400px;
-    }
-    .glass {
-      backdrop-filter: blur(20px);
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      padding: 2rem;
-      color: #000;
-    }
-    input, button {
-      width: 100%;
-      margin: 0.5rem 0;
-      padding: 0.75rem;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-    }
-    #entries > div {
-      margin-top: 1rem;
-      padding: 1rem;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.25);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    button.edit, button.delete {
-      margin-left: 0.5rem;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pushup Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-  <div class="container glass">
-    <h1>Pushup Tracker</h1>
-    <form id="entryForm">
-      <input type="date" id="date" required />
-      <input type="number" id="count" placeholder="Pushups" required />
-      <button type="submit">Add Entry</button>
-    </form>
-    <div id="entries"></div>
-  </div>
+    <div class="container">
+        <div class="glass-card">
+            <h1>Pushup Tracker</h1>
+            
+            <div class="input-group">
+                <input type="number" id="pushupCount" placeholder="Number of pushups" min="1">
+                <input type="date" id="workoutDate">
+                <button id="addBtn"><i class="fas fa-plus"></i> Add Entry</button>
+            </div>
+            
+            <div class="entries-container">
+                <h2>Your Entries</h2>
+                <div id="entriesList"></div>
+            </div>
+        </div>
+    </div>
 
-  <script>
-    const form = document.getElementById('entryForm');
-    const dateInput = document.getElementById('date');
-    const countInput = document.getElementById('count');
-    const entriesContainer = document.getElementById('entries');
-
-    function uuid() {
-      return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    }
-
-    function loadEntries() {
-      const entries = JSON.parse(localStorage.getItem('pushupEntries') || '[]');
-      entriesContainer.innerHTML = '';
-      entries.forEach(entry => {
-        const div = document.createElement('div');
-        div.innerHTML = \`
-          \${entry.date} - \${entry.count} pushups
-          <span>
-            <button class="edit" onclick='editEntry("\${entry.id}")'>Edit</button>
-            <button class="delete" onclick='deleteEntry("\${entry.id}")'>Delete</button>
-          </span>
-        \`;
-        entriesContainer.appendChild(div);
-      });
-    }
-
-    form.onsubmit = e => {
-      e.preventDefault();
-      const entries = JSON.parse(localStorage.getItem('pushupEntries') || '[]');
-      entries.push({
-        id: uuid(),
-        date: dateInput.value,
-        count: parseInt(countInput.value)
-      });
-      localStorage.setItem('pushupEntries', JSON.stringify(entries));
-      form.reset();
-      dateInput.valueAsDate = new Date();
-      loadEntries();
-    };
-
-    function deleteEntry(id) {
-      let entries = JSON.parse(localStorage.getItem('pushupEntries') || '[]');
-      entries = entries.filter(e => e.id !== id);
-      localStorage.setItem('pushupEntries', JSON.stringify(entries));
-      loadEntries();
-    }
-
-    function editEntry(id) {
-      let entries = JSON.parse(localStorage.getItem('pushupEntries') || '[]');
-      const entry = entries.find(e => e.id === id);
-      if (!entry) return;
-      const newDate = prompt("New date (YYYY-MM-DD):", entry.date);
-      const newCount = prompt("New pushup count:", entry.count);
-      if (newDate && newCount) {
-        entry.date = newDate;
-        entry.count = parseInt(newCount);
-        localStorage.setItem('pushupEntries', JSON.stringify(entries));
-        loadEntries();
-      }
-    }
-
-    dateInput.valueAsDate = new Date();
-    loadEntries();
-  </script>
+    <script>
+        // Load entries when page loads
+        document.addEventListener('DOMContentLoaded', loadEntries);
+        
+        // Add entry button click handler
+        document.getElementById('addBtn').addEventListener('click', addEntry);
+        
+        // Default date to today
+        document.getElementById('workoutDate').valueAsDate = new Date();
+        
+        // Store entries in localStorage
+        let entries = JSON.parse(localStorage.getItem('pushupEntries')) || [];
+        
+        function addEntry() {
+            const count = document.getElementById('pushupCount').value;
+            const date = document.getElementById('workoutDate').value;
+            
+            if (!count || !date) {
+                alert('Please enter both count and date');
+                return;
+            }
+            
+            const entry = {
+                id: Date.now(),
+                count: parseInt(count),
+                date: date
+            };
+            
+            entries.push(entry);
+            saveEntries();
+            renderEntries();
+            
+            // Reset input
+            document.getElementById('pushupCount').value = '';
+            document.getElementById('workoutDate').valueAsDate = new Date();
+        }
+        
+        function renderEntries() {
+            const entriesList = document.getElementById('entriesList');
+            entriesList.innerHTML = '';
+            
+            if (entries.length === 0) {
+                entriesList.innerHTML = '<p class="no-entries">No entries yet. Add your first pushup entry!</p>';
+                return;
+            }
+            
+            // Sort by date (newest first)
+            entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            entries.forEach(entry => {
+                const entryElement = document.createElement('div');
+                entryElement.className = 'entry';
+                entryElement.innerHTML = `
+                    <div class="entry-info">
+                        <span class="entry-count">${entry.count} pushups</span>
+                        <span class="entry-date">${formatDate(entry.date)}</span>
+                    </div>
+                    <div class="entry-actions">
+                        <button class="edit-btn" data-id="${entry.id}"><i class="fas fa-edit"></i></button>
+                        <button class="delete-btn" data-id="${entry.id}"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                entriesList.appendChild(entryElement);
+            });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.getAttribute('data-id') || e.target.parentElement.getAttribute('data-id'));
+                    deleteEntry(id);
+                });
+            });
+            
+            // Add event listeners to edit buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.getAttribute('data-id') || e.target.parentElement.getAttribute('data-id'));
+                    editEntry(id);
+                });
+            });
+        }
+        
+        function deleteEntry(id) {
+            if (confirm('Are you sure you want to delete this entry?')) {
+                entries = entries.filter(entry => entry.id !== id);
+                saveEntries();
+                renderEntries();
+            }
+        }
+        
+        function editEntry(id) {
+            const entry = entries.find(entry => entry.id === id);
+            if (!entry) return;
+            
+            const newCount = prompt('Edit pushup count:', entry.count);
+            if (newCount === null) return;
+            
+            const newDate = prompt('Edit date (YYYY-MM-DD):', entry.date);
+            if (newDate === null) return;
+            
+            entry.count = parseInt(newCount);
+            entry.date = newDate;
+            saveEntries();
+            renderEntries();
+        }
+        
+        function saveEntries() {
+            localStorage.setItem('pushupEntries', JSON.stringify(entries));
+        }
+        
+        function loadEntries() {
+            entries = JSON.parse(localStorage.getItem('pushupEntries')) || [];
+            renderEntries();
+        }
+        
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+    </script>
 </body>
 </html>
